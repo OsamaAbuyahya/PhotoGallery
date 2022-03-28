@@ -25,7 +25,12 @@ object DatabaseModule {
             context,
             PhotoDatabase::class.java,
             DATABASE_NAME
-        ).build()
+        ).fallbackToDestructiveMigration().build()
     }
 
+    @Provides
+    @Singleton
+    fun providePhotoDao(photoDatabase: PhotoDatabase): PhotoDao {
+        return photoDatabase.photoDao()
+    }
 }
