@@ -1,4 +1,4 @@
-package os.abuyahya.photogallery.ui.fragment
+package os.abuyahya.photogallery.ui.fragment.myFavoriteFrag
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
