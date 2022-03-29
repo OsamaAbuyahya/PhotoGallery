@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -13,7 +14,9 @@ import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import os.abuyahya.photogallery.adapter.PhotoAdapter
 import os.abuyahya.photogallery.databinding.FragmentMyFavoriteBinding
+import os.abuyahya.photogallery.model.Photo
 import os.abuyahya.photogallery.ui.viewmodel.MainViewModel
+import os.abuyahya.photogallery.util.Status
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -49,10 +52,7 @@ class MyFavoriteFragment : Fragment(), TabLayout.OnTabSelectedListener {
         getFavoritePhoto()
     }
 
-    override fun onTabSelected(tab: TabLayout.Tab?) {
-        setLayoutManger(tab?.position)
-    }
-
+    override fun onTabSelected(tab: TabLayout.Tab?) { setLayoutManger(tab?.position) }
     override fun onTabUnselected(tab: TabLayout.Tab?) {}
     override fun onTabReselected(tab: TabLayout.Tab?) {}
 
@@ -62,10 +62,25 @@ class MyFavoriteFragment : Fragment(), TabLayout.OnTabSelectedListener {
 
     private fun subscribeToObservers() {
         viewModel.listFavPhotos.observe(viewLifecycleOwner) {
-            binding.progressBar.isVisible = false
-            binding.tvNoResult.isVisible = it.isEmpty()
-            photoAdapter.setList(it)
+            when (it.status) {
+                Status.SUCCESS -> {
+                    binding.progressBar.isVisible = false
+                    setList(it.data!!)
+                }
+                Status.ERROR -> {
+                    binding.progressBar.isVisible = false
+                    Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
+                }
+                Status.LOADING -> {
+                    binding.progressBar.isVisible = true
+                }
+            }
         }
+    }
+
+    private fun setList(photos: List<Photo>) {
+        binding.tvNoResult.isVisible = photos.isEmpty()
+        photoAdapter.setList(photos)
     }
 
     private fun setupRecyclerView() {
