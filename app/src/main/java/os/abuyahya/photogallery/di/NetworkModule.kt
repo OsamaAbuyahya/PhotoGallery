@@ -8,6 +8,8 @@ import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import os.abuyahya.photogallery.data.remote.PhotoApi
 import os.abuyahya.photogallery.util.Constants.BASE_URL
+import os.abuyahya.photogallery.util.Constants.CONNECT_TIMEOUT
+import os.abuyahya.photogallery.util.Constants.READ_TIMEOUT
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
@@ -21,8 +23,8 @@ object NetworkModule {
     @Singleton
     fun provideHttpClient(): OkHttpClient =
         OkHttpClient.Builder()
-            .readTimeout(15, TimeUnit.SECONDS)
-            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(READ_TIMEOUT.toLong(), TimeUnit.SECONDS)
+            .connectTimeout(CONNECT_TIMEOUT.toLong(), TimeUnit.SECONDS)
             .build()
 
     @Provides

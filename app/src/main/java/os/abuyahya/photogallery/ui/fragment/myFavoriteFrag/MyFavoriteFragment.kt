@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import os.abuyahya.photogallery.adapter.PhotoAdapter
 import os.abuyahya.photogallery.databinding.FragmentMyFavoriteBinding
@@ -15,7 +17,7 @@ import os.abuyahya.photogallery.ui.viewmodel.MainViewModel
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MyFavoriteFragment : Fragment() {
+class MyFavoriteFragment : Fragment(), TabLayout.OnTabSelectedListener {
 
     lateinit var viewModel: MainViewModel
 
@@ -36,10 +38,23 @@ class MyFavoriteFragment : Fragment() {
         subscribeToObservers()
         setupRecyclerView()
         setOnAdapterClickListener()
-        getFavoritePhoto()
+
+        binding.tabLayout.addOnTabSelectedListener(this)
 
         return binding.root
     }
+
+    override fun onResume() {
+        super.onResume()
+        getFavoritePhoto()
+    }
+
+    override fun onTabSelected(tab: TabLayout.Tab?) {
+        setLayoutManger(tab?.position)
+    }
+
+    override fun onTabUnselected(tab: TabLayout.Tab?) {}
+    override fun onTabReselected(tab: TabLayout.Tab?) {}
 
     private fun getFavoritePhoto() {
         viewModel.getListFavPhotos()
@@ -48,11 +63,8 @@ class MyFavoriteFragment : Fragment() {
     private fun subscribeToObservers() {
         viewModel.listFavPhotos.observe(viewLifecycleOwner) {
             binding.progressBar.isVisible = false
-            if (it.isNotEmpty()) {
-                photoAdapter.setList(it)
-            } else {
-                binding.tvNoResult.isVisible = true
-            }
+            binding.tvNoResult.isVisible = it.isEmpty()
+            photoAdapter.setList(it)
         }
     }
 
@@ -73,6 +85,23 @@ class MyFavoriteFragment : Fragment() {
                 viewModel.addPhotoToFav(photo)
             else
                 viewModel.removePhotoFromFav(photo.id)
+        }
+    }
+
+    private fun setLayoutManger(position: Int?) {
+        binding.recFavPhoto.layoutManager = if (position == 0) {
+            LinearLayoutManager(
+                requireContext(),
+                LinearLayoutManager.VERTICAL,
+                false
+            )
+        } else {
+            GridLayoutManager(
+                requireContext(),
+                2,
+                GridLayoutManager.VERTICAL,
+                false
+            )
         }
     }
 
