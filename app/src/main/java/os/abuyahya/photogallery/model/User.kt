@@ -11,6 +11,4 @@ data class User (
     var name: String,
     @SerializedName("profile_image")
     var profileImage: ProfileImage,
-) {
-
-}
+)

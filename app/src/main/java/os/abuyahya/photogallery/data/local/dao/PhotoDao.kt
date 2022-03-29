@@ -26,7 +26,4 @@ interface PhotoDao {
     @Query("DELETE FROM `favorite photo table` WHERE id = :photoId")
     suspend fun removePhotoFromFav(photoId: String)
 
-
-
-
 }

@@ -10,37 +10,48 @@ import kotlinx.coroutines.launch
 import os.abuyahya.photogallery.model.Photo
 import os.abuyahya.photogallery.repository.Repository
 import os.abuyahya.photogallery.util.Constants.CLIENT_ID
+import os.abuyahya.photogallery.util.Resource
 
 
 class MainViewModel @ViewModelInject constructor(
     private val repository: Repository
 ): ViewModel() {
 
-    private val _listPhotos = MutableLiveData<List<Photo>>()
-    val listPhotos: LiveData<List<Photo>> = _listPhotos
+    private val _listPhotos = MutableLiveData<Resource<List<Photo>>>()
+    val listPhotos: LiveData<Resource<List<Photo>>> = _listPhotos
 
-    private val _listFavPhotos = MutableLiveData<List<Photo>>()
-    val listFavPhotos: LiveData<List<Photo>> = _listFavPhotos
+    private val _listFavPhotos = MutableLiveData<Resource<List<Photo>>>()
+    val listFavPhotos: LiveData<Resource<List<Photo>>> = _listFavPhotos
 
-    private val _listSearchPhotos = MutableLiveData<List<Photo>>()
-    val listSearchPhotos: LiveData<List<Photo>> = _listSearchPhotos
+    private val _listSearchPhotos = MutableLiveData<Resource<List<Photo>>>()
+    val listSearchPhotos: LiveData<Resource<List<Photo>>> = _listSearchPhotos
 
     fun getListPhotos() {
+        _listPhotos.postValue(Resource.loading(null))
         viewModelScope.launch(Dispatchers.IO) {
-            val listPhotosFromDB = repository.getListPhotosFromDB()
-            val photos = listPhotosFromDB.ifEmpty {
-                val listPhotosFromNetwork = repository.getListPhotosFromNetwork(CLIENT_ID)
-                repository.addAllListPhotos(listPhotosFromNetwork)
-                listPhotosFromNetwork
+            try {
+                val listPhotosFromDB = repository.getListPhotosFromDB()
+                val photos = listPhotosFromDB.ifEmpty {
+                    val listPhotosFromNetwork = repository.getListPhotosFromNetwork(CLIENT_ID)
+                    repository.addAllListPhotos(listPhotosFromNetwork)
+                    listPhotosFromNetwork
+                }
+                _listPhotos.postValue(Resource.success(photos))
+            } catch (e: Exception) {
+                _listPhotos.postValue(Resource.error(e.message, null))
             }
-            _listPhotos.postValue(photos)
         }
     }
 
     fun searchPhotos(query: String) {
+        _listSearchPhotos.postValue(Resource.loading(null))
         viewModelScope.launch(Dispatchers.IO) {
-            val searchPhotosApi = repository.searchPhotos(CLIENT_ID, query)
-            _listSearchPhotos.postValue(searchPhotosApi.results)
+            try {
+                val searchPhotosApi = repository.searchPhotos(CLIENT_ID, query)
+                _listSearchPhotos.postValue(Resource.success(searchPhotosApi.results))
+            } catch (e: Exception) {
+                _listSearchPhotos.postValue(Resource.error(e.message, null))
+            }
         }
     }
 
@@ -57,8 +68,13 @@ class MainViewModel @ViewModelInject constructor(
     }
 
     fun getListFavPhotos() {
+        _listFavPhotos.postValue(Resource.loading(null))
         viewModelScope.launch(Dispatchers.IO) {
-            _listFavPhotos.postValue(repository.getListFavPhotos())
+            try {
+                _listFavPhotos.postValue(Resource.success(repository.getListFavPhotos()))
+            } catch (e: Exception) {
+                _listFavPhotos.postValue(Resource.error(e.message, null))
+            }
         }
     }
 

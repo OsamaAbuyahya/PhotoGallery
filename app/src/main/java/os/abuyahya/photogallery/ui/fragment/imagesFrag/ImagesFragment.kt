@@ -16,7 +16,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import os.abuyahya.photogallery.R
 import os.abuyahya.photogallery.adapter.PhotoAdapter
 import os.abuyahya.photogallery.databinding.FragmentImagesBinding
+import os.abuyahya.photogallery.model.Photo
 import os.abuyahya.photogallery.ui.viewmodel.MainViewModel
+import os.abuyahya.photogallery.util.Status
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -69,10 +71,25 @@ class ImagesFragment : Fragment(), TabLayout.OnTabSelectedListener {
 
     private fun subscribeToObservers() {
         viewModel.listPhotos.observe(viewLifecycleOwner) {
-            binding.progressBar.isVisible = false
-            binding.tvNoResult.isVisible = it.isEmpty()
-            photoAdapter.setList(it)
+            when (it.status) {
+                Status.SUCCESS -> {
+                    binding.progressBar.isVisible = false
+                    setList(it.data!!)
+                }
+                Status.ERROR -> {
+                    binding.progressBar.isVisible = false
+                    Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
+                }
+                Status.LOADING -> {
+                    binding.progressBar.isVisible = true
+                }
+            }
         }
+    }
+
+    private fun setList(photos: List<Photo>) {
+        binding.tvNoResult.isVisible = photos.isEmpty()
+        photoAdapter.setList(photos)
     }
 
     private fun setLayoutManger(position: Int?) {
@@ -93,7 +110,7 @@ class ImagesFragment : Fragment(), TabLayout.OnTabSelectedListener {
     }
 
     private fun setOnAdapterClickListener() {
-        photoAdapter.setIconFavClickListener{ photo, isFavorite ->
+        photoAdapter.setIconFavClickListener { photo, isFavorite ->
             if (isFavorite)
                 viewModel.addPhotoToFav(photo)
             else
