@@ -1,19 +1,17 @@
 package os.abuyahya.photogallery.ui.fragment.imagesFrag
 
-import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
-import os.abuyahya.photogallery.R
 import os.abuyahya.photogallery.adapter.PhotoAdapter
 import os.abuyahya.photogallery.databinding.FragmentImagesBinding
 import os.abuyahya.photogallery.ui.viewmodel.MainViewModel
@@ -40,6 +38,7 @@ class ImagesFragment : Fragment(), TabLayout.OnTabSelectedListener {
 
         subscribeToObservers()
         setupRecyclerView()
+        setOnAdapterClickListener()
         getPhotos()
 
         binding.tabLayout.addOnTabSelectedListener(this)
@@ -47,12 +46,41 @@ class ImagesFragment : Fragment(), TabLayout.OnTabSelectedListener {
         return binding.root
     }
 
+    override fun onTabSelected(tab: TabLayout.Tab?) {
+        setLayoutManger(tab?.position)
+    }
+    override fun onTabUnselected(tab: TabLayout.Tab?) {}
+    override fun onTabReselected(tab: TabLayout.Tab?) {}
+
     private fun getPhotos() {
         viewModel.getListPhotos()
     }
 
-    override fun onTabSelected(tab: TabLayout.Tab?) {
-        binding.recPhoto.layoutManager = if (tab?.position == 0) {
+    private fun setupRecyclerView() {
+        binding.recPhoto.apply {
+            layoutManager = LinearLayoutManager(
+                requireContext(),
+                LinearLayoutManager.VERTICAL,
+                false
+            )
+            adapter = photoAdapter
+        }
+    }
+
+    private fun subscribeToObservers() {
+        viewModel.listPhotos.observe(viewLifecycleOwner) {
+            binding.progressBar.isVisible = false
+            if (it.isNotEmpty()) {
+                photoAdapter.setList(it)
+                Toast.makeText(requireContext(), it[0].id, Toast.LENGTH_SHORT).show()
+            } else {
+                binding.tvNoResult.isVisible = true
+            }
+        }
+    }
+
+    private fun setLayoutManger(position: Int?) {
+        binding.recPhoto.layoutManager = if (position == 0) {
             LinearLayoutManager(
                 requireContext(),
                 LinearLayoutManager.VERTICAL,
@@ -68,36 +96,12 @@ class ImagesFragment : Fragment(), TabLayout.OnTabSelectedListener {
         }
     }
 
-    override fun onTabUnselected(tab: TabLayout.Tab?) {}
-    override fun onTabReselected(tab: TabLayout.Tab?) {}
-
-    private fun setupRecyclerView() {
-        binding.recPhoto.apply {
-            layoutManager = LinearLayoutManager(
-                requireContext(),
-                LinearLayoutManager.VERTICAL,
-                false
-            )
-            adapter = photoAdapter
-        }
-
+    private fun setOnAdapterClickListener() {
         photoAdapter.setIconFavClickListener{ photo, isFavorite ->
-            if (isFavorite) {
+            if (isFavorite)
                 viewModel.addPhotoToFav(photo)
-                Toast.makeText(requireContext(), "Added To Fav", Toast.LENGTH_SHORT).show()
-            }
             else
                 viewModel.removePhotoFromFav(photo.id)
-        }
-    }
-
-    private fun subscribeToObservers() {
-        viewModel.listPhotos.observe(viewLifecycleOwner) {
-            if (it.isNotEmpty()) {
-                photoAdapter.listPhotos = it
-            } else {
-                Toast.makeText(requireContext(), "Empty", Toast.LENGTH_SHORT).show()
-            }
         }
     }
 

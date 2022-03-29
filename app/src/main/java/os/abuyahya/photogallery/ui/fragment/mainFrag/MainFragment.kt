@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import os.abuyahya.photogallery.R
@@ -24,8 +25,12 @@ class MainFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         _binding = FragmentMainBinding.inflate(layoutInflater, container, false)
+
         setupViewPager()
 
+        binding.edtSearch.setOnClickListener{
+            findNavController().navigate(R.id.action_mainFragment_to_searchFragment)
+        }
         return binding.root
     }
 
