@@ -5,4 +5,6 @@
     <string name="images">Images</string>
     <string name="my_favourite">My Favourite</string>
     <string name="results">Results</string>
+    <string name="ne_result">Ne Result</string>
+    <string name="favorites_file_is_empty">Favorites file is empty</string>
 </resources>

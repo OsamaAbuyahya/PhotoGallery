@@ -26,8 +26,8 @@ object AppModule {
         @ApplicationContext context: Context
     ): RequestManager = Glide.with(context).setDefaultRequestOptions(
         RequestOptions()
-            .placeholder(R.drawable.ic_launcher_background)
-            .error(R.drawable.ic_launcher_background)
+            .placeholder(R.drawable.ic_placeholder)
+            .error(R.drawable.ic_placeholder)
             .diskCacheStrategy(DiskCacheStrategy.DATA)
             .apply(RequestOptions().transform(CenterCrop(), RoundedCorners(16)))
     )
