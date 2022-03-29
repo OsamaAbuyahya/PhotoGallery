@@ -25,7 +25,23 @@ class MainViewModel @ViewModelInject constructor(
     private val _listSearchPhotos = MutableLiveData<List<Photo>>()
     val listSearchPhotos: LiveData<List<Photo>> = _listSearchPhotos
 
-    init {
+    fun getListPhotos() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val listPhotosFromDB = repository.getListPhotosFromDB()
+            val photos = listPhotosFromDB.ifEmpty {
+                val listPhotosFromNetwork = repository.getListPhotosFromNetwork(CLIENT_ID)
+                repository.addAllListPhotos(listPhotosFromNetwork)
+                listPhotosFromNetwork
+            }
+            _listPhotos.postValue(photos)
+        }
+    }
+
+    fun searchPhotos(query: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val searchPhotosApi = repository.searchPhotos(CLIENT_ID, query)
+            _listSearchPhotos.postValue(searchPhotosApi.results)
+        }
     }
 
     fun addPhotoToFav(photo: Photo) {
@@ -46,22 +62,4 @@ class MainViewModel @ViewModelInject constructor(
         }
     }
 
-    fun getListPhotos() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val listPhotosFromDB = repository.getListPhotosFromDB()
-            val photos = listPhotosFromDB.ifEmpty {
-                val listPhotosFromNetwork = repository.getListPhotosFromNetwork(CLIENT_ID)
-                repository.addAllListPhotos(listPhotosFromNetwork)
-                listPhotosFromNetwork
-            }
-            _listPhotos.postValue(photos)
-        }
-    }
-
-    fun searchPhotos(query: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val searchPhotosApi = repository.searchPhotos(CLIENT_ID, query)
-            _listSearchPhotos.postValue(searchPhotosApi.results)
-        }
-    }
 }
