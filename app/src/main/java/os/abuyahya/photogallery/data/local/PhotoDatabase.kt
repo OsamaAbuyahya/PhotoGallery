@@ -8,7 +8,7 @@ import os.abuyahya.photogallery.data.local.dao.PhotoDao
 import os.abuyahya.photogallery.model.FavPhoto
 import os.abuyahya.photogallery.model.Photo
 
-@Database(entities = [Photo::class, FavPhoto::class], version = 6)
+@Database(entities = [Photo::class, FavPhoto::class], version = 7)
 @TypeConverters(DatabaseConverter::class)
 abstract class PhotoDatabase: RoomDatabase() {
 
