@@ -22,6 +22,9 @@ class MainViewModel @ViewModelInject constructor(
     private val _listFavPhotos = MutableLiveData<List<Photo>>()
     val listFavPhotos: LiveData<List<Photo>> = _listFavPhotos
 
+    private val _listSearchPhotos = MutableLiveData<List<Photo>>()
+    val listSearchPhotos: LiveData<List<Photo>> = _listSearchPhotos
+
     init {
     }
 
@@ -52,6 +55,13 @@ class MainViewModel @ViewModelInject constructor(
                 listPhotosFromNetwork
             }
             _listPhotos.postValue(photos)
+        }
+    }
+
+    fun searchPhotos(query: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val searchPhotosApi = repository.searchPhotos(CLIENT_ID, query)
+            _listSearchPhotos.postValue(searchPhotosApi.results)
         }
     }
 }

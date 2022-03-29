@@ -8,10 +8,12 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
+import os.abuyahya.photogallery.R
 import os.abuyahya.photogallery.adapter.PhotoAdapter
 import os.abuyahya.photogallery.databinding.FragmentImagesBinding
 import os.abuyahya.photogallery.ui.viewmodel.MainViewModel
@@ -46,9 +48,7 @@ class ImagesFragment : Fragment(), TabLayout.OnTabSelectedListener {
         return binding.root
     }
 
-    override fun onTabSelected(tab: TabLayout.Tab?) {
-        setLayoutManger(tab?.position)
-    }
+    override fun onTabSelected(tab: TabLayout.Tab?) { setLayoutManger(tab?.position) }
     override fun onTabUnselected(tab: TabLayout.Tab?) {}
     override fun onTabReselected(tab: TabLayout.Tab?) {}
 
@@ -70,12 +70,8 @@ class ImagesFragment : Fragment(), TabLayout.OnTabSelectedListener {
     private fun subscribeToObservers() {
         viewModel.listPhotos.observe(viewLifecycleOwner) {
             binding.progressBar.isVisible = false
-            if (it.isNotEmpty()) {
-                photoAdapter.setList(it)
-                Toast.makeText(requireContext(), it[0].id, Toast.LENGTH_SHORT).show()
-            } else {
-                binding.tvNoResult.isVisible = true
-            }
+            binding.tvNoResult.isVisible = it.isEmpty()
+            photoAdapter.setList(it)
         }
     }
 
